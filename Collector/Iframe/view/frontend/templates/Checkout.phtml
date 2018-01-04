@@ -1,0 +1,4 @@
+<?php $this->getShippingMethods(); ?>
+<div id="collector-checkout" class="collector-checkout">
+	<script src="<?php echo $this->getCheckoutUrl() ?>" data-token="<?php echo $this->getPublicToken(); ?>" data-lang='<?php echo $this->getLanguage();?>' <?php echo $this->getDataVariant();?>></script>
+</div>

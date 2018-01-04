@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Store/etc/config.xsd">
+    <default>
+        <payment>
+            <collector_invoice>
+                <payment_action>authorize</payment_action>
+                <model>Collector\Gateways\Model\Payment\Invoice</model>
+                <active>1</active>
+                <title>Collector Invoice</title>
+                <order_status>pending_payment</order_status>
+				<is_gateway>1</is_gateway>
+                <can_order>1</can_order>
+                <can_capture>1</can_capture>
+                <can_refund>1</can_refund>
+				<group>collector</group>
+            </collector_invoice>
+			<collector_partpay>
+                <payment_action>authorize</payment_action>
+                <model>Collector\Gateways\Model\Payment\Partpay</model>
+                <active>1</active>
+                <title>Collector Partpay</title>
+                <order_status>pending_payment</order_status>
+				<is_gateway>1</is_gateway>
+                <can_order>1</can_order>
+                <can_capture>1</can_capture>
+				<group>collector</group>
+                <can_refund>1</can_refund>
+            </collector_partpay>
+			<collector_account>
+                <payment_action>authorize</payment_action>
+                <model>Collector\Gateways\Model\Payment\Account</model>
+                <active>1</active>
+                <title>Collector Account</title>
+                <order_status>pending_payment</order_status>
+				<is_gateway>1</is_gateway>
+                <can_order>1</can_order>
+                <can_capture>1</can_capture>
+                <can_refund>1</can_refund>
+				<group>collector</group>
+            </collector_account>
+        </payment>
+    </default>
+</config>

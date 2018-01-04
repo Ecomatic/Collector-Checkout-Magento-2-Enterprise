@@ -1,0 +1,133 @@
+<?php $this->getShippingMethods(); 
+	$priceHelper = \Magento\Framework\App\ObjectManager::getInstance()->create('Magento\Framework\Pricing\Helper\Data');
+?>
+<div class="collector-cart" id="collector-cart">
+	<h2 class="checkout title"><?php echo __('Shopping Cart')?></h2>
+	<div id="businesstypes" style="float:right;">
+		<a class="btype active" id="b2c"><?php echo __('Privat');?></a> | <a class="btype inactive" id="b2b"><?php echo __('Företag');?></a>
+	</div>
+	<div id="area-spinner-container" class="area-spinner-container">
+		<div class="spinner-animation">&nbsp;</div>
+	</div>
+	<div id="table-responsive" class="table-responsive">
+		<div class="collector-checkout-cart-table">
+			<div class="collector-checkout-table-head">
+				<div class="collector-checkout-product-head"> 
+					<?php echo __('Product Name') ?> 
+				</div>
+				<div class="collector-checkout-price-head">
+					<?php echo __('Price') ?>
+				</div>
+				<div class="collector-checkout-qty-head">
+					<?php echo __('Qty') ?>
+				</div>
+				<div class="collector-checkout-sum-head">
+					<?php echo __('Sum') ?>
+				</div>
+			</div>
+			<span id="collector-checkout-line" class="collector-checkout-line"></span>
+			<?php foreach($this->getProducts() as $product): ?>
+				<div class="collector-checkout-product-row">
+					<div class="collector-checkout-del-but">
+						<span id="col-del-btn del_<?php echo $product['id']?>" class="collector-checkout-button-del del" name="del"></span>
+					</div>
+					<div class="collector-checkout-img">
+						<img src="<?php echo $product['img']?>" alt="logo">
+					</div>
+					<div class="collector-checkout-name">
+						<p><?php echo $product['name'] ?></p>
+						<?php echo $product['options'] ?>
+					</div>
+					<div class="collector-checkout-price" id="price_<?php echo $product['id']?>">
+						<?php echo $product['unitPrice'] ?>
+					</div>
+					<div class="collector-checkout-qty" id="qty_ <?php echo $product['id'] ?>">
+						<button class="collector-checkout-button-sub sub" id="col-sub-btn sub_ <?php echo $product['id'] ?>" name="sub">-</button>
+						<div class="collector-checkout-product-qty"><?php echo $product['qty']?></div>
+						<button id="col-inc-btn inc_<?php echo $product['id']?>" class="collector-checkout-button-inc inc" name="inc">+</button>
+					</div>
+					<div class="collector-checkout-sum" id="sum_<?php echo $product['id'] ?>">
+						<?php echo $product['sum'] ?>
+					</div>					
+					<span id="collector-checkout-line" class="collector-checkout-line"></span>
+				</div>
+			<?php endforeach; ?>
+		</div>
+	</div>
+	<div id="totals-table" class="totals-table">
+		<table class="totals">
+			<?php $totals = $this->getTotals(); foreach ($totals as $total): ?>
+				<tr>
+					<td class="name">
+						<?php echo $total->getData()['title']; ?>
+					</td>
+					<td class="price">
+						<?php
+							if ($total->getData()['code'] == 'shipping'){
+								echo $this->getShippingPrice();
+							}
+							else if ($total->getData()['code'] == 'grand_total'){
+								if (empty($totals['shipping']->getData()['title']->getArguments())){
+									echo $priceHelper->currency($total->getData()['value']+$this->getShippingPriceExclFormatting(), true, false);
+								}
+								else {
+									if (isset($total->getData()['value_incl_tax'])){
+										echo $priceHelper->currency($total->getData()['value_incl_tax'], true, false);
+									}
+									else {
+										echo $priceHelper->currency($total->getData()['value'], true, false);
+									}
+								}
+							}
+							else {
+								if (isset($total->getData()['value_incl_tax'])){
+									echo $priceHelper->currency($total->getData()['value_incl_tax'], true, false);
+								}
+								else {
+									echo $priceHelper->currency($total->getData()['value'], true, false);
+								}
+							}
+						?>
+					</td>
+				</tr>
+			<?php endforeach; ?>
+		</table>
+		<div class="collector-checkout-discount">
+		<form action="javascript:void(0);">
+			<?php if ($this->hasCoupon()){ ?>
+				<input type="text" name="code" id="code" class="code" value="<?php echo $_SESSION['collector_applied_discount_code']; ?>">
+				<input type="button" id="codeButton" class="codeButton" value="<?php echo __('Cancel') ?>">
+			<?php } else { ?>
+				<input type="text" name="code" placeholder="Voucher" id="code" class="code">
+				<input type="button" id="codeButton" class="codeButton" value="<?php echo __('Apply') ?>">
+			<?php } ?>
+		</form>
+	</div>
+	<script>
+		document.getElementById("code").addEventListener("keyup", function(event) {
+			event.preventDefault();
+			if (event.keyCode == 13) {
+				document.getElementById("codeButton").click();
+			}
+		});
+	</script>
+	</div>	
+	<div class="collector_shipping_methods">
+		<h1><?php echo __('Shipping Methods') ?></h1>
+		<form>
+			<?php foreach ($this->getShippingMethods() as $method): ?>
+				<?php if ($method['first']): ?>
+					<div class="ship_methods">
+						<input type="radio" class="radio" id="<?php echo $method['code']?>" name="method" value="<?php echo $method['code']?>" checked>
+						<label for="<?php echo $method['code']?>" class="radio_label"><?php echo $method['content']?></label>
+					</div>
+				<?php else: ?>
+					<div class="ship_methods" >
+						<input type="radio" class="radio" id="<?php echo $method['code']?>" name="method" value="<?php echo $method['code']?>">
+						<label for="<?php echo $method['code']?>" class="radio_lable"><?php echo $method['content']?></label>
+					</div>
+				<?php endif; ?>
+			<?php endforeach; ?>
+		</form>
+	</div>	
+</div>

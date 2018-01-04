@@ -1,0 +1,9 @@
+<script>
+	require(
+		['jquery', 'Collector_Iframe/js/cart'],
+		function($, CollectorAjax) {
+			var ajaxUrl = '<?php echo $block->getAjaxUrl(); ?>';
+			CollectorAjax.call(ajaxUrl);
+		}
+	);
+</script>

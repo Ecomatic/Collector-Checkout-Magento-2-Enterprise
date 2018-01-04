@@ -1,0 +1,25 @@
+{
+    "name": "collector/module-iframe",
+    "description": "",
+    "license": "GPL-3.0",
+    "authors": [
+        {
+            "name": "Mage2Gen",
+            "email": "info@mage2gen.com"
+        },
+        {
+            "name": "Henrik L\u00f6fstr\u00f6m",
+            "email": "toifarn@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Collector\\Iframe\\": ""
+        }
+    }
+}

@@ -1,0 +1,19 @@
+<?php
+$url = $_SESSION['collector_url'];
+$dataLang = $_SESSION['collector_language'];
+$dataVariant = $_SESSION['collector_data_variant'];
+$publicToken =  $_SESSION['collector_public_token'];
+unset($_SESSION['collector_public_token']);
+?>
+
+<script>
+    require([
+        'Magento_Customer/js/customer-data'
+    ], function (customerData) {
+        var sections = ['cart'];
+        customerData.invalidate(sections);
+    });
+</script>
+<div id="collector-checkout" class="collector-checkout">
+	<script src="<?php echo $url; ?>" data-token="<?php echo $publicToken; ?>" data-lang='<?php echo $dataLang;?>' <?php echo $dataVariant;?>></script>
+</div>

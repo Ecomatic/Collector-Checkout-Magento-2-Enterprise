@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+	<event name="payment_method_assign_data_collector_invoice">
+		<observer instance="Collector\Gateways\Observer\DataAssignObserver" name="collector_gateways_collector_invoice_save_data"/>
+	</event>
+	<event name="payment_method_assign_data_collector_partpay">
+		<observer instance="Collector\Gateways\Observer\DataAssignObserver" name="collector_gateways_collector_invoice_save_data"/>
+	</event>
+	<event name="payment_method_assign_data_collector_account">
+		<observer instance="Collector\Gateways\Observer\DataAssignObserver" name="collector_gateways_collector_invoice_save_data"/>
+	</event>
+	<event name="sales_order_payment_refund">
+		<observer instance="Collector\Gateways\Observer\RefundObserver" name="collector_gateways_refund"/>
+	</event>
+	<event name="order_cancel_after">
+		<observer instance="Collector\Gateways\Observer\CancelObserver" name="collector_gateways_cancel"/>
+	</event>
+</config>

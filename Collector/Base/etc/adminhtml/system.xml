@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+	<system>
+		<tab id="collector" translate="label" sortOrder="10">
+			<label>Collector</label>
+		</tab>
+		<section id="collector_collectorcheckout" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+			<label>Checkout</label>
+			<tab>collector</tab>
+			<resource>Collector_CollectorCheckout::collector_collectorcheckout</resource>
+			<group id="general" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+				<label>General</label>
+				<field id="active" translate="label comment" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+					<label>Enable</label>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+				</field>
+				<field id="testmode" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+					<label>Collector Test Mode</label>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+					<comment>
+						Testmode, no real orders.
+					</comment>
+				</field>
+				<field id="username" translate="label" type="text" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="1">
+					<label>Username</label>
+				</field>
+				<field id="sharedkey" translate="label" type="password" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+					<label>iframe Password</label>
+				</field>
+				<field id="password" translate="label" type="password" sortOrder="25" showInDefault="1" showInWebsite="1" showInStore="1">
+					<label>old password</label>
+				</field>
+				<field id="b2c_storeid" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+					<label>b2c storeid</label>
+				</field>
+				<field id="b2b_storeid" translate="label" type="text" sortOrder="35" showInDefault="1" showInWebsite="1" showInStore="1">
+					<label>b2b storeid</label>
+				</field>
+				<field id="terms_url" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+					<label>terms and conditions url</label>
+				</field>
+				<field id="customer_type" translate="label" type="select" sortOrder="45" showInDefault="1" showInWebsite="1" showInStore="1">
+					<label>customer type</label>
+					<source_model>Collector\Iframe\Model\Config\Source\Customertype</source_model>
+				</field>
+				<field id="acceptstatus" translate="label" type="select" sortOrder="45" showInDefault="1" showInWebsite="1" showInStore="1">
+					<label>Accept Status</label>
+					<source_model>Collector\Iframe\Model\Config\Source\AcceptStatus</source_model>
+				</field>
+				<field id="holdstatus" translate="label" type="select" sortOrder="45" showInDefault="1" showInWebsite="1" showInStore="1">
+					<label>Hold Status</label>
+					<source_model>Collector\Iframe\Model\Config\Source\HoldStatus</source_model>
+				</field>
+				<field id="deniedstatus" translate="label" type="select" sortOrder="45" showInDefault="1" showInWebsite="1" showInStore="1">
+					<label>Denied Status</label>
+					<source_model>Collector\Iframe\Model\Config\Source\DeniedStatus</source_model>
+				</field>
+			</group>
+			<group id="invoice" translate="label" type="text" sortOrder="150" showInDefault="1" showInWebsite="1" showInStore="1">
+				<label>Invoice</label>
+				<field id="invoice_fee_b2c" translate="label comment" type="text" sortOrder="155" showInDefault="1" showInWebsite="1" showInStore="1">
+					<label>Invoice Fee B2C</label>
+				</field>
+				<field id="invoice_fee_b2c_tax_class" translate="label" type="select" sortOrder="160" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Tax Class for B2C Invoice Fee</label>
+                    <source_model>Magento\Tax\Model\TaxClass\Source\Product</source_model>
+                </field>
+				<field id="invoice_fee_b2b" translate="label comment" type="text" sortOrder="165" showInDefault="1" showInWebsite="1" showInStore="1">
+					<label>Invoice Fee B2B</label>
+				</field>
+				<field id="invoice_fee_b2b_tax_class" translate="label" type="select" sortOrder="170" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Tax Class for B2B Invoice Fee</label>
+                    <source_model>Magento\Tax\Model\TaxClass\Source\Product</source_model>
+                </field>
+			</group>
+		</section>
+	</system>
+</config>

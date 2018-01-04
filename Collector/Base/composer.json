@@ -1,0 +1,25 @@
+{
+    "name": "collector/module-base",
+    "description": "Shared Settings for Collector Gateways and Collector Iframe",
+    "license": "GPL-3.0",
+    "authors": [
+        {
+            "email": "info@mage2gen.com",
+            "name": "Mage2Gen"
+        },
+        {
+            "email": "toifarn@gmail.com",
+            "name": "Henrik L\u00f6fstr\u00f6m"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Collector\\Base\\": ""
+        },
+        "files": [
+            "registration.php"
+        ]
+    }
+}
