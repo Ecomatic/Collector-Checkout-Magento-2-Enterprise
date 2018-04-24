@@ -3,7 +3,7 @@ define([
 ], function ($, collectorajax) {
 	return {
 		call:function(ajaxUrl){
-			$(document).on('click', '.inc', function() {
+			$(document).on('click', '.col-inc', function() {
 				var param = {
 					field1 : "ajax", 
 					field2 : "inc",
@@ -39,7 +39,7 @@ define([
 					}
 				});
 			});
-			$(document).on('click', '.sub', function() {
+			$(document).on('click', '.col-sub', function() {
 				var param = {
 					field1 : "ajax", 
 					field2 : "sub",
@@ -75,9 +75,33 @@ define([
 					}
 				});
 			});
-			$(document).on('click', '.del', function() {
+			$(document).on('click', '.newsletter', function(){
 				var param = {
-					field1 : "ajax", 
+					field1 : "ajax",
+					field2 : "newsletter",
+					field3 : document.getElementById('newsletter-checkbox').checked
+				};
+				$.ajax({
+					url: ajaxUrl,
+					data: param,
+					type: "POST",
+					dataType: 'json',
+					beforeSend: function(){
+						jQuery('body').addClass('is-suspended');
+						window.collector.checkout.api.suspend();
+					},
+					success: function(data){
+						
+					},
+					complete: function(){
+						jQuery('body').removeClass('is-suspended');
+						window.collector.checkout.api.resume();
+					}
+				});
+			});
+			$(document).on('click', '.col-del', function() {
+				var param = {
+					field1 : "ajax",
 					field2 : "del",
 					field3 : this.id
 				};
@@ -91,8 +115,17 @@ define([
 						window.collector.checkout.api.suspend();
 					},					   
 					success: function(data) {
-						if(data.cart)
-						{
+						if (data == "redirect"){
+							require([
+							'Magento_Customer/js/customer-data'
+						], function (customerData) {
+							var sections = ['cart'];
+							customerData.invalidate(sections);
+							customerData.reload(sections, true);
+						});
+							window.location.href = window.location.protocol + "//" + window.location.host + "/";
+						}
+						if(data.cart){
 							jQuery('div.collector-cart').replaceWith(data.cart);
 						}
 					},
@@ -109,7 +142,7 @@ define([
 					}
 				});
 			});
-			$(document).on('click', '.radio', function() {
+			$(document).on('click', '.col-radio', function() {
 				var param = {
 					field1 : "ajax", 
 					field2 : "radio",
@@ -140,11 +173,11 @@ define([
 					},
 				});
 			});
-			$(document).on('click', '.codeButton', function(){
+			$(document).on('click', '.col-codeButton', function(){
 				var param = {
 					field1 : "ajax",
 					field2 : "submit",
-					field3 : document.getElementById("code").value
+					field3 : document.getElementById("col-code").value
 				};
 				$.ajax({
 					url: ajaxUrl,
@@ -156,8 +189,7 @@ define([
 						window.collector.checkout.api.suspend();
 					},					   
 					success: function(data) {
-						if(data.cart)
-						{
+						if(data.cart){
 							jQuery('div.collector-cart').replaceWith(data.cart);
 						}
 					},
@@ -199,16 +231,16 @@ define([
 							jQuery('div.collector-checkout').replaceWith(data.checkout);
 						}
 						if (ctype == "b2b"){
-							jQuery("#b2c").addClass("inactive");
-							jQuery("#b2c").removeClass("active");
-							jQuery("#b2b").addClass("active");
-							jQuery("#b2b").removeClass("inactive");
+							jQuery("#b2c").addClass("col-inactive");
+							jQuery("#b2c").removeClass("col-active");
+							jQuery("#b2b").addClass("col-active");
+							jQuery("#b2b").removeClass("col-inactive");
 						}
 						else if (ctype == "b2c"){
-							jQuery("#b2b").addClass("inactive");
-							jQuery("#b2b").removeClass("active");
-							jQuery("#b2c").addClass("active");
-							jQuery("#b2c").removeClass("inactive");
+							jQuery("#b2b").addClass("col-inactive");
+							jQuery("#b2b").removeClass("col-active");
+							jQuery("#b2c").addClass("col-active");
+							jQuery("#b2c").removeClass("col-inactive");
 						}					
 					},
 					complete: function() {

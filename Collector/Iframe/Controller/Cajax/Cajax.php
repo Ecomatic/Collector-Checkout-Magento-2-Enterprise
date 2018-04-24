@@ -123,7 +123,7 @@ class Cajax extends \Magento\Framework\App\Action\Action
 							);
 						}
 						$_product = $product->load($item->getProduct()->getId());
-						$cart->addProduct($_product, $params);
+						$cart->addProduct($item->getProduct(), $params);
 						$cart->save();
 						$changed = true;
 						$updateCart = true;
@@ -152,6 +152,19 @@ class Cajax extends \Magento\Framework\App\Action\Action
 
 			//	}
 			}
+			else if ($_POST['field2'] == 'newsletter'){
+				ob_start();
+				print_r($_POST);
+				file_put_contents("var/log/coldev.log", ob_get_clean() . "\n", FILE_APPEND);
+				if ($_POST['field3'] == "true"){
+				file_put_contents("var/log/coldev.log", "true" . "\n", FILE_APPEND);
+					$_SESSION['newsletter_signup'] = true;
+				}
+				else {
+				file_put_contents("var/log/coldev.log", "false" . "\n", FILE_APPEND);
+					$_SESSION['newsletter_signup'] = false;
+				}
+			}
 			else if ($_POST['field2'] == 'del'){
 				$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
 				$cart = $objectManager->get('\Magento\Checkout\Model\Cart');
@@ -161,7 +174,7 @@ class Cajax extends \Magento\Framework\App\Action\Action
 				foreach ($allItems as $item) {
 					if ($item->getId() == $id){
 						if (count($allItems) == 1){
-							$this->helper->clearSession();
+							$cart->removeItem($item->getId())->save();
 							return $result->setData("redirect");
 						}
 						else {

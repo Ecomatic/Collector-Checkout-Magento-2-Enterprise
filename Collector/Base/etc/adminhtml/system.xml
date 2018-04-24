@@ -27,9 +27,6 @@
 				<field id="sharedkey" translate="label" type="password" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
 					<label>iframe Password</label>
 				</field>
-				<field id="password" translate="label" type="password" sortOrder="25" showInDefault="1" showInWebsite="1" showInStore="1">
-					<label>old password</label>
-				</field>
 				<field id="b2c_storeid" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
 					<label>b2c storeid</label>
 				</field>

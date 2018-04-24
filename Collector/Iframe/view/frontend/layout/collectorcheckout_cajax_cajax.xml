@@ -10,11 +10,11 @@
 		</referenceContainer>
 		<referenceContainer name="page.wrapper">
 			<container name="collector-cart" htmlTag="div" htmlClass="collector-cart-wrapper" after="header-wrapper">
-				<block class="Collector\Iframe\Block\Cart" cacheable="false" name="collectorjscart" template="Cartjs.phtml" before="main" after="header-wrapper" />
-				<block class="Collector\Iframe\Block\Cart" cacheable="false" name="collectorcart" template="Cart.phtml" before="main" after="header-wrapper" />
+				<block class="Collector\Iframe\Block\Cart" cacheable="false" name="collectorjscart" template="Collector_Iframe::Cartjs.phtml" before="main" after="header-wrapper" />
+				<block class="Collector\Iframe\Block\Cart" cacheable="false" name="collectorcart" template="Collector_Iframe::Cart.phtml" before="main" after="header-wrapper" />
 			</container>
 			<container name="collector-checkout" htmlTag="div" htmlClass="collector-checkout-wrapper" after="collector-cart">
-				<block class="Collector\Iframe\Block\Checkout" cacheable="false" name="collectorcheckout" template="Checkout.phtml" after="collector-cart"/>
+				<block class="Collector\Iframe\Block\Checkout" cacheable="false" name="collectorcheckout" template="Collector_Iframe::Checkout.phtml" after="collector-cart"/>
 			</container>
 		</referenceContainer>
 	</body>

@@ -10,7 +10,7 @@
 		</referenceContainer>
 		<referenceContainer name="page.wrapper">
 			<container name="collector-test" htmlTag="div" htmlClass="collector-test-wrapper" after="header-wrapper">
-				<block class="Collector\Iframe\Block\Test" cacheable="false" name="collectortest" template="Test.phtml" before="main" after="header-wrapper" />
+				<block class="Collector\Iframe\Block\Test" cacheable="false" name="collectortest" template="Collector_Iframe::Test.phtml" before="main" after="header-wrapper" />
 			</container>
 		</referenceContainer>
 	</body>

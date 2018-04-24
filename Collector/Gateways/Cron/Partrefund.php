@@ -114,7 +114,7 @@ class Partrefund {
 			}
 			ob_start();
 			print_r($req);
-			file_put_contents("var/log/req.log", "part-credit ". $memo->getOrder()->getIncrementId() . ": " . ob_get_clean() . "\n", FILE_APPEND);
+			file_put_contents(BP . "/var/log/req.log", "part-credit ". $memo->getOrder()->getIncrementId() . ": " . ob_get_clean() . "\n", FILE_APPEND);
 			try {
 				$client->PartCreditInvoice($req);
 				$memo->setData('fee_amount', $order->getData('fee_amount_invoiced'));
@@ -124,7 +124,7 @@ class Partrefund {
 				$memo->save();
 			}
 			catch (\Exception $e){
-				file_put_contents("var/log/collector.log", "partcredit error: " . $e->getMessage() . "\n", FILE_APPEND);
+				file_put_contents(BP . "/var/log/collector.log", "partcredit error: " . $e->getMessage() . "\n", FILE_APPEND);
 				$memo->setData('collector_refunded', '1');
 				$memo->save();
 			}

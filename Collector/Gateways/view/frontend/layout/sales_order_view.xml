@@ -12,7 +12,7 @@
 			<block class="Collector\Gateways\Block\Sales\Order\Fee" name="fee"/>
 		</referenceContainer>
 		<referenceContainer name="payment_additional_info">
-			<block class="Collector\Gateways\Block\Adminhtml\PaymentInfo" template="PaymentInfo.phtml" name="paymentinfo"/>
+			<block class="Collector\Gateways\Block\Adminhtml\PaymentInfo" template="Collector_Gateways::PaymentInfo.phtml" name="paymentinfo"/>
 		</referenceContainer>
 	</body>
 </page>

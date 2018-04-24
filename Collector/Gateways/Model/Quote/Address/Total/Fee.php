@@ -131,7 +131,11 @@ class Fee extends \Magento\Quote\Model\Quote\Address\Total\AbstractTotal
 		}
         if($this->_helperData->canApply($quote) && !$checkout) {
 			if (is_null($quote->getShippingAddress()->getCity())){
-				$result = [];
+				$result = [
+					'code' => $this->getCode(),
+					'title' => __('Invoice Fee'),
+					'value' => 0
+				];
 			}
 			else {
 				$storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
@@ -161,7 +165,11 @@ class Fee extends \Magento\Quote\Model\Quote\Address\Total\AbstractTotal
 			}
 		}
 		else {
-			$result = [];
+			$result = [
+				'code' => $this->getCode(),
+				'title' => __('Invoice Fee'),
+				'value' => 0
+			];
 		}
         return $result;
     }

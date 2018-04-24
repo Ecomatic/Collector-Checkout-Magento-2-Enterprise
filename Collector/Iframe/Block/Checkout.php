@@ -48,6 +48,18 @@ class Checkout extends \Magento\Checkout\Block\Onepage {
 			$_SESSION['collector_language'] = "sv";
 			return "sv";
 		}
+		else if ($lang == "FI"){
+			$_SESSION['collector_language'] = "fi-FI";
+			return "fi-FI";
+		}
+		else if ($lang == "DK"){
+			$_SESSION['collector_language'] = "en-DK";
+			return "en-DK";
+		}
+		else if ($lang == "DE"){
+			$_SESSION['collector_language'] = "en-DE";
+			return "en-DE";
+		}
 		else {
 			return null;
 		}
@@ -138,11 +150,6 @@ class Checkout extends \Magento\Checkout\Block\Onepage {
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
 		$output = curl_exec($ch);
-		ob_start();
-		var_dump($output);
-		echo "\n";
-		var_dump(curl_getinfo($ch));
-		file_put_contents("test", ob_get_clean() . "\n", FILE_APPEND);
 		$result = json_decode($output,true);
 		$_SESSION['collector_public_token'] = $result["data"]["publicToken"];
 		$_SESSION['collector_private_id'] = $result['data']['privateId'];

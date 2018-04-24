@@ -48,7 +48,7 @@ class CancelObserver extends AbstractDataAssignObserver{
 				print_r($e->getMessage());
 				echo "\n";
 				print_r($e->getTraceAsString());
-				file_put_contents("var/log/collector.log", "exception: " . ob_get_clean() . "\n", FILE_APPEND);
+				file_put_contents(BP . "/var/log/collector.log", "exception: " . ob_get_clean() . "\n", FILE_APPEND);
 			}
 		}
 	}

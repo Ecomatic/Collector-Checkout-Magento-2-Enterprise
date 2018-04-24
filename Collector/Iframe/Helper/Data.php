@@ -64,6 +64,16 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper {
         return $this->scopeConfig->getValue('tax/classes/shipping_tax_class', $storeScope);
 	}
 	
+	public function getB2BInvoiceFeeTaxClass(){
+		$storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
+        return $this->scopeConfig->getValue('collector_collectorcheckout/invoice/invoice_fee_b2b_tax_class', $storeScope);
+	}
+	
+	public function getB2CInvoiceFeeTaxClass(){
+		$storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
+        return $this->scopeConfig->getValue('collector_collectorcheckout/invoice/invoice_fee_b2c_tax_class', $storeScope);
+	}
+	
 	public function getUsername(){
 		$storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
         return $this->scopeConfig->getValue('collector_collectorcheckout/general/username', $storeScope);
@@ -403,6 +413,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper {
 				}
 			}
 		}
+		if (!isset($_SESSION['curr_shipping_price'])){
+			$_SESSION['curr_shipping_price'] = 0;
+		}
 		if($inclFormatting){
 			return $priceHelper->currency($_SESSION['curr_shipping_price'], true, false);
 		}
@@ -509,10 +522,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper {
 			else {
 				$qty = $cartItem->getQty();
 			}
+			$price = $cartItem->getPriceInclTax();
+			if ($cartItem->getPriceInclTax() == 0){
+				$price = $cartItem->getParentItem()->getPriceInclTax();
+			}
 			array_push($items['items'], array(
 				'id' => $cartItem->getSku(),
 				'description' => $cartItem->getName(),
-				'unitPrice' => round($cartItem->getPriceInclTax(),2),
+				'unitPrice' => round($price, 2),
 				'quantity' => $qty,
 				'vat' => $percent
 			));
@@ -521,21 +538,41 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper {
 		if (array_key_exists('fee', $cartTotals)){
 			$fee = $cartTotals['fee']->getData()['value'];
 		}
-		if ($cart->getQuote()->getGrandTotal() < ($cartTotals['subtotal']->getData()['value_incl_tax'] + $fee + $this->getShippingInclTax()['unitPrice'])){
-			if ($cart->getQuote()->getCouponCode() != null){
-				$coupon = $cart->getQuote()->getCouponCode();
+		if (array_key_exists('value_incl_tax', $cartTotals['subtotal']->getData())){
+			if ($cart->getQuote()->getGrandTotal() < ($cartTotals['subtotal']->getData()['value_incl_tax'] + $fee + $this->getShippingInclTax()['unitPrice'])){
+				if ($cart->getQuote()->getCouponCode() != null){
+					$coupon = $cart->getQuote()->getCouponCode();
+				}
+				else  {
+					$coupon = "no_code";
+				}
+				$code = array(
+					'id' => 'discount',
+					'description' => $coupon,
+					'quantity' => 1,
+					'unitPrice' => sprintf("%01.2f", $cart->getQuote()->getGrandTotal() - ($cartTotals['subtotal']->getData()['value_incl_tax'] + $fee + $this->getShippingInclTax()['unitPrice'])),
+					'vat' => '25',
+				);
+				array_push($items['items'], $code);
 			}
-			else  {
-				$coupon = "no_code";
+		}
+		else {
+			if ($cart->getQuote()->getGrandTotal() < ($cartTotals['subtotal']->getData()['value'] + $fee + $this->getShippingInclTax()['unitPrice'])){
+				if ($cart->getQuote()->getCouponCode() != null){
+					$coupon = $cart->getQuote()->getCouponCode();
+				}
+				else  {
+					$coupon = "no_code";
+				}
+				$code = array(
+					'id' => 'discount',
+					'description' => $coupon,
+					'quantity' => 1,
+					'unitPrice' => sprintf("%01.2f", $cart->getQuote()->getGrandTotal() - ($cartTotals['subtotal']->getData()['value'] + $fee + $this->getShippingInclTax()['unitPrice'])),
+					'vat' => '25',
+				);
+				array_push($items['items'], $code);
 			}
-			$code = array(
-				'id' => 'discount',
-				'description' => $coupon,
-				'quantity' => 1,
-				'unitPrice' => sprintf("%01.2f", $cart->getQuote()->getGrandTotal() - ($cartTotals['subtotal']->getData()['value_incl_tax'] + $fee + $this->getShippingInclTax()['unitPrice'])),
-				'vat' => '25',
-			);
-			array_push($items['items'], $code);
 		}
 		return $items;
 	}
@@ -596,12 +633,16 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper {
 		}
 		$storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
 		$fee = \Magento\Framework\App\ObjectManager::getInstance()->get('\Magento\Framework\App\Config\ScopeConfigInterface')->getValue('collector_collectorcheckout/invoice/invoice_fee_b2b', $storeScope);
+		$taxCalculation = $this->objectManager->get('\Magento\Tax\Model\Calculation');
+		$request = $taxCalculation->getRateRequest(null, null, null, $currentStoreId);
+		$feeTaxClass = $this->getB2CInvoiceFeeTaxClass();
+		$feeTax = $taxCalculation->getRate($request->setProductClassId($feeTaxClass));
 		if ($fee > 0){
 			$iFee = array(
 				'id' => 'invoice_fee',
 				'description' => 'Invoice Fee',
 				'unitPrice' => $fee,
-				'vat' => $_SESSION['curr_shipping_tax_rate']
+				'vat' => $feeTax
 			);
 			$ret['directinvoicenotification'] = $iFee;
 		}
@@ -630,8 +671,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper {
 			return "https://checkout-api-uat.collector.se/";
 		}
 		else {
-			return "https://checkout-api.collector.se";
-			
+			return "https://checkout-api.collector.se/";
 		}
 	}
 		

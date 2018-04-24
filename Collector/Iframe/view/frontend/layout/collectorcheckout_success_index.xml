@@ -4,16 +4,16 @@
 		<css src="Collector_Iframe/css/success.css" />
 	</head> 
     <body>
-        <referenceContainer name="checkout.root" remove="true">
+    <!--    <referenceContainer name="checkout.root" remove="true">
             <action method="setTemplate">
                 <argument name="template" xsi:type="string">Collector_Iframe::Success.phtml</argument>
             </action>
-        </referenceContainer>
+        </referenceContainer>-->
 		<referenceContainer name="columns">
 			<container name="div.sidebar.main" htmlTag="div" htmlClass="sidebar sidebar-main" after="main">
 			</container>
 			<container name="column.main" htmlTag="div" htmlClass="column main" before="main"> <!--   -->
-				<block class="Collector\Iframe\Block\Checkout" cacheable="false" name="collectorcheckoutsuccess" template="Success.phtml" />
+				<block class="Collector\Iframe\Block\Checkout" cacheable="false" name="collectorcheckoutsuccess" template="Collector_Iframe::Success.phtml" />
 			</container>
 		</referenceContainer>
     </body>

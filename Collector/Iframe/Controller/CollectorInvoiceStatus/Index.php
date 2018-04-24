@@ -30,7 +30,7 @@ class Index extends \Magento\Framework\App\Action\Action
 	protected $filterBuilder;
 	protected $filterGroupBuilder;
 	protected $searchCriteriaBuilder;
-	
+
     protected $jsonHelper;
 	protected $layoutFactory;
     protected $objectManager;
@@ -46,6 +46,7 @@ class Index extends \Magento\Framework\App\Action\Action
 	protected $cartRepositoryInterface;
 	protected $eventManager;
 	protected $cartManagementInterface;
+	protected $orderState;
     /**
      * Constructor
      *
@@ -60,7 +61,7 @@ class Index extends \Magento\Framework\App\Action\Action
         \Magento\Framework\Api\Search\FilterGroupBuilder $_filterGroupBuilder,
         \Magento\Framework\Api\SearchCriteriaBuilder $_searchCriteriaBuilder,
         \Magento\Framework\View\Result\PageFactory $resultPageFactory,
-		
+
 		\Magento\Framework\View\Result\LayoutFactory $_layoutFactory,
 		\Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory,
 		\Magento\Quote\Api\CartRepositoryInterface $_cartRepositoryInterface,
@@ -74,15 +75,17 @@ class Index extends \Magento\Framework\App\Action\Action
 		\Magento\Quote\Model\ResourceModel\Quote\CollectionFactory $_quoteCollectionFactory,
 		\Magento\Quote\Model\Quote\Address\Rate $_shippingRate,
 		\Magento\Framework\Event\Manager $eventManager,
-        \Magento\Framework\Json\Helper\Data $jsonHelper
+        \Magento\Framework\Json\Helper\Data $jsonHelper,
+        \Collector\Iframe\Model\State $orderState
     ) {
+        $this->orderState = $orderState;
         $this->resultPageFactory = $resultPageFactory;
         $this->helper = $_helper;
         $this->filterBuilder = $_filterBuilder;
 		$this->cart = $_cart;
 		$this->filterGroupBuilder = $_filterGroupBuilder;
 		$this->searchCriteriaBuilder = $_searchCriteriaBuilder;
-		
+
 		$this->formKey = $formKey;
 		$this->layoutFactory = $_layoutFactory;
 		$this->eventManager = $eventManager;
@@ -114,17 +117,20 @@ class Index extends \Magento\Framework\App\Action\Action
             if ($order->getId()){
                 if ($_GET['InvoiceStatus'] == "0"){
                     $status = $this->helper->getHoldStatus();
-                    $order->setState($status)->setStatus($status);
+                    $state = $this->orderState->load($status)->getState();
+                    $order->setState($state)->setStatus($status);
                     $order->save();
                 }
                 else if ($_GET['InvoiceStatus'] == "1"){
                     $status = $this->helper->getAcceptStatus();
-                    $order->setState($status)->setStatus($status);
+                    $state = $this->orderState->load($status)->getState();
+                    $order->setState($state)->setStatus($status);
                     $order->save();
                 }
                 else {
                     $status = $this->helper->getDeniedStatus();
-                    $order->setState($status)->setStatus($status);
+                    $state = $this->orderState->load($status)->getState();
+                    $order->setState($state)->setStatus($status);
                     $order->save();
                 }
             }
@@ -136,7 +142,6 @@ class Index extends \Magento\Framework\App\Action\Action
         }
         return $this->resultPageFactory->create();
     }
-	
 	public function createOrder($quote, $incrementID){
 		$privId = $quote->getData('collector_private_id');
 		$btype = $quote->getData('collector_btype');
@@ -193,11 +198,8 @@ class Index extends \Magento\Framework\App\Action\Action
 				$discountCode = $_SESSION['collector_applied_discount_code'];
 			}
 			$shippingCode = $_SESSION['curr_shipping_code'];
-			
 			$actual_quote = $this->quoteCollectionFactory->create()->addFieldToFilter("reserved_order_id", $response['data']['reference'])->getFirstItem();
-			
 			$actual_quote_id = $actual_quote->getId();
-			
 			//init the store id and website id @todo pass from array
 			$store = $this->storeManager->getStore();
 			$websiteId = $this->storeManager->getStore()->getWebsiteId();
@@ -227,7 +229,6 @@ class Index extends \Magento\Framework\App\Action\Action
 				$actual_quote->setCouponCode($discountCode);
 			}
 			//Set Address to quote @todo add section in order data for seperate billing and handle it
-			
 			$billingAddress = array(
 				'firstname' => $response['data']['customer']['billingAddress']['firstName'],
 				'lastname' => $response['data']['customer']['billingAddress']['lastName'],
@@ -248,7 +249,6 @@ class Index extends \Magento\Framework\App\Action\Action
 			);
 			$actual_quote->getBillingAddress()->addData($billingAddress);
 			$actual_quote->getShippingAddress()->addData($shippingAddressArr);
-			
 			// Collect Rates and Set Shipping & Payment Method
 			$this->shippingRate->setCode($shippingCode)->getPrice();
 			$shippingAddress = $actual_quote->getShippingAddress();
@@ -295,42 +295,38 @@ class Index extends \Magento\Framework\App\Action\Action
 			}
 			$order->setData('fee_amount', $fee);
 			$order->setData('base_fee_amount', $fee);
-			
 			$order->setGrandTotal($order->getGrandTotal() + $fee);
 			$order->setBaseGrandTotal($order->getBaseGrandTotal() + $fee);
-			
-			
+
 			if ($response["data"]["purchase"]["result"] == "OnHold"){
                 $status = $this->helper->getHoldStatus();
-				$order->setState($status)->setStatus($status);
-				$order->save();
-			}
-			else if ($response["data"]["purchase"]["result"] == "Preliminary"){
+                $state = $this->orderState->load($status)->getState();
+                $order->setState($state)->setStatus($status);
+                $order->save();
+            } else if ($response["data"]["purchase"]["result"] == "Preliminary") {
                 $status = $this->helper->getAcceptStatus();
-				$order->setState($status)->setStatus($status);
-				$order->save();
-			}
-			else {
+                $state = $this->orderState->load($status)->getState();
+                $order->setState($state)->setStatus($status);
+                $order->save();
+            } else {
                 $status = $this->helper->getDeniedStatus();
-				$order->setState($status)->setStatus($status);
+                $state = $this->orderState->load($status)->getState();
+				$order->setState($state)->setStatus($status);
 				$order->save();
 			}
-			
 			$this->eventManager->dispatch(
 					'checkout_onepage_controller_success_action',
 					['order_ids' => [$order->getId()]]
 			);
-			
 			$this->checkoutSession->clearStorage();
 			$this->checkoutSession->clearQuote();
 			return $resultPage;
 		}
 		catch (\Exception $e){
-			file_put_contents("var/log/collector.log", "checkout error: " . $e->getMessage() . "\n", FILE_APPEND);
+			file_put_contents(BP . "/var/log/collector.log", "checkout error: " . $e->getMessage() . "\n", FILE_APPEND);
 			return $resultPage;
 		}
 	}
-	
 	public function getResp($privId, $btype){
 		$init = $this->helper->getWSDL();
 		if($privId){
@@ -346,14 +342,12 @@ class Index extends \Magento\Framework\App\Action\Action
 					$pstoreId = $this->helper->getB2CStoreID();
 					$array['storeId'] = $pstoreId;
 				}
-				
 			} else {
 				$pusername = $this->helper->getUsername();
 				$psharedSecret = $this->helper->getPassword();
 				$pstoreId = $this->helper->getB2CStoreID();
 				$array['storeId'] = $pstoreId;
 			}
-					
 			$path = '/merchants/'.$pstoreId.'/checkouts/'.$privId;
 			$hash = $pusername.":".hash("sha256",$path.$psharedSecret);
 			$hashstr = 'SharedKey '.base64_encode($hash);
@@ -366,7 +360,6 @@ class Index extends \Magento\Framework\App\Action\Action
 
 			$output = curl_exec($ch);
 			$data = json_decode($output,true);
-			
 			if($data["data"]){
 				$result['code'] = 1;
 				$result['id'] = $data["id"];

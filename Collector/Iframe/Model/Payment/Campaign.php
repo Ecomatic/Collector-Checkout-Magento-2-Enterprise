@@ -145,7 +145,7 @@ class Campaign extends \Magento\Payment\Model\Method\AbstractMethod
 			
 			ob_start();
 			print_r($req);
-			file_put_contents("var/log/req.log", "auth " . $payment->getOrder()->getIncrementId() . ": " . ob_get_clean() . "\n", FILE_APPEND);
+			file_put_contents(BP . "/var/log/req.log", "auth " . $payment->getOrder()->getIncrementId() . ": " . ob_get_clean() . "\n", FILE_APPEND);
 			try {
 				$resp = $client->AddInvoice($req);
 				if ($resp->InvoiceStatus < 5){
@@ -161,7 +161,7 @@ class Campaign extends \Magento\Payment\Model\Method\AbstractMethod
 				print_r($e->getMessage());
 				echo "\n";
 				print_r($e->getTraceAsString());
-				file_put_contents("var/log/collector.log", "exception: " . ob_get_clean() . "\n", FILE_APPEND);
+				file_put_contents(BP . "/var/log/collector.log", "exception: " . ob_get_clean() . "\n", FILE_APPEND);
 			}
 		}
 		$_SESSION['is_iframe'] = false;
@@ -206,12 +206,12 @@ class Campaign extends \Magento\Payment\Model\Method\AbstractMethod
 			catch (\Exception $e){
 				ob_start();
 				var_dump($req);
-				file_put_contents("var/log/req.log", "capture " . $payment->getOrder()->getIncrementId() . ": " . ob_get_clean() . "\n", FILE_APPEND);
+				file_put_contents(BP . "/var/log/req.log", "capture " . $payment->getOrder()->getIncrementId() . ": " . ob_get_clean() . "\n", FILE_APPEND);
 				ob_start();
 				print_r($e->getMessage());
 				echo "\n";
 				print_r($e->getTraceAsString());
-				file_put_contents("var/log/collector.log", "exception: " . ob_get_clean() . "\n", FILE_APPEND);
+				file_put_contents(BP . "/var/log/collector.log", "exception: " . ob_get_clean() . "\n", FILE_APPEND);
 			}
 		}
 		else {
@@ -266,7 +266,7 @@ class Campaign extends \Magento\Payment\Model\Method\AbstractMethod
 					}
 					ob_start();
 					print_r($req);
-					file_put_contents("var/log/req.log", "part-capture ". $payment->getOrder()->getIncrementId() . ": " . ob_get_clean() . "\n", FILE_APPEND);
+					file_put_contents(BP . "/var/log/req.log", "part-capture ". $payment->getOrder()->getIncrementId() . ": " . ob_get_clean() . "\n", FILE_APPEND);
 					try {
 						$resp = $client->PartActivateInvoice($req);
 						$payment->setTransactionId($order->getData('collector_invoice_id'));
@@ -282,7 +282,7 @@ class Campaign extends \Magento\Payment\Model\Method\AbstractMethod
 						print_r($e->getMessage());
 						echo "\n";
 						print_r($e->getTraceAsString());
-						file_put_contents("var/log/collector.log", "exception: " . ob_get_clean() . "\n", FILE_APPEND);
+						file_put_contents(BP . "/var/log/collector.log", "exception: " . ob_get_clean() . "\n", FILE_APPEND);
 					}
 				}
 			}
@@ -321,7 +321,7 @@ class Campaign extends \Magento\Payment\Model\Method\AbstractMethod
 			print_r($e->getMessage());
 			echo "\n";
 			print_r($e->getTraceAsString());
-			file_put_contents("var/log/collector.log", "exception: " . ob_get_clean() . "\n", FILE_APPEND);
+			file_put_contents(BP . "/var/log/collector.log", "exception: " . ob_get_clean() . "\n", FILE_APPEND);
 			
 		}
     }
@@ -358,7 +358,7 @@ class Campaign extends \Magento\Payment\Model\Method\AbstractMethod
 			print_r($e->getMessage());
 			echo "\n";
 			print_r($e->getTraceAsString());
-			file_put_contents("var/log/collector.log", "exception: " . ob_get_clean() . "\n", FILE_APPEND);
+			file_put_contents(BP . "/var/log/collector.log", "exception: " . ob_get_clean() . "\n", FILE_APPEND);
 		}
 	}
 	
@@ -390,7 +390,7 @@ class Campaign extends \Magento\Payment\Model\Method\AbstractMethod
 			);
 			ob_start();
 			print_r($req);
-			file_put_contents("var/log/req.log", "refund " . $payment->getOrder()->getIncrementId() . ": " . ob_get_clean() . "\n", FILE_APPEND);
+			file_put_contents(BP . "/var/log/req.log", "refund " . $payment->getOrder()->getIncrementId() . ": " . ob_get_clean() . "\n", FILE_APPEND);
 			try {
 				$client->CreditInvoice($req);
 			}
@@ -399,7 +399,7 @@ class Campaign extends \Magento\Payment\Model\Method\AbstractMethod
 				print_r($e->getMessage());
 				echo "\n";
 				print_r($e->getTraceAsString());
-				file_put_contents("var/log/collector.log", "exception: " . ob_get_clean() . "\n", FILE_APPEND);
+				file_put_contents(BP . "/var/log/collector.log", "exception: " . ob_get_clean() . "\n", FILE_APPEND);
 			}
 		}
 		else {
@@ -422,16 +422,11 @@ class Campaign extends \Magento\Payment\Model\Method\AbstractMethod
 			}
 			ob_start();
 			print_r($req);
-			file_put_contents("req", "part refund " . $payment->getOrder()->getIncrementId() . ": " . ob_get_clean() . "\n", FILE_APPEND);
+			file_put_contents(BP . "/var/log/req.log", "part refund " . $payment->getOrder()->getIncrementId() . ": " . ob_get_clean() . "\n", FILE_APPEND);
 			try {
 				$client->PartCreditInvoice($req);
 			}
 			catch (\Exception $e){
-				ob_start();
-				print_r($e->getMessage());
-				echo "\n";
-				print_r($e->getTraceAsString());
-				file_put_contents("test", "exception: " . ob_get_clean() . "\n", FILE_APPEND);
 			}*/
 		}
     }
