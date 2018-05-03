@@ -1,0 +1,45 @@
+.collector-checkout-qty {
+    margin-top: 40px;
+}
+button.inc {
+    margin-top: -22px;
+}	
+.collector-checkout-sum {
+    margin-top: -25px;
+}
+.collector-checkout-del-but {    
+    margin-top: -25px;
+}
+h2.checkout.title {
+    float: none;
+	}
+button.sub {   
+    line-height: 1;
+}
+button.inc {   
+    line-height: 1;
+    padding-left: 8px;
+}
+.letter_methods.newsletter {
+    margin-right: 160px;
+}
+ul.links li {
+    border: none;
+}
+label.radio_label {
+    margin-top: 5px;
+}
+.collector_shipping_methods .ship_methods .radio + label:before {
+    height: 15px;
+    width: 15px;
+    margin-top: 2px;
+}
+ul.links li a {
+    color: #90969A;
+}
+.footer-middle ul.features {
+    font-weight: normal;
+}
+.footer-middle a {
+    color: #90969A;
+}

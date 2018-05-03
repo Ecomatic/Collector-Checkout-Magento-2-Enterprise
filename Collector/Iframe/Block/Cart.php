@@ -7,14 +7,14 @@ class Cart extends \Magento\Checkout\Block\Onepage {
 	protected $storeManager;
 	protected $helper;
     protected $shippingRate;
-	
+	protected $checkoutSession;
 	private $initialized = false;
 
     public function __construct(
 		\Magento\Framework\View\Element\Template\Context $context, 
 		array $data = [],
 		\Magento\Framework\ObjectManagerInterface $_objectManager,
-		\Magento\Checkout\Model\Session $checkoutSession,
+		\Magento\Checkout\Model\Session $_checkoutSession,
         \Magento\Checkout\Helper\Data $checkoutHelper,
 		\Magento\Quote\Model\Quote\Address\Rate $_shippingRate,
 		\Magento\Framework\Data\Form\FormKey $formKey,
@@ -27,33 +27,37 @@ class Cart extends \Magento\Checkout\Block\Onepage {
 		$this->helper = $_helper;
 		$this->shippingRate = $_shippingRate;
         $this->storeManager = $context->getStoreManager();
+		$this->checkoutSession = $_checkoutSession;
 		$this->init();
 	}
 	
-	protected function init(){
+	public function init(){
 		if ($this->initialized){
 			return;
 		}
 		$cart = $this->objectManager->get('\Magento\Checkout\Model\Cart');
-		$cart->getQuote()->getBillingAddress()->addData(array(
-			'firstname' => 'Kalle',
-			'lastname' => 'Anka',
-			'street' => 'Ankgatan',
-			'city' => 'Ankeborg',
-			'country_id' => 'SE',
-			'postcode' => '12345',
-			'telephone' => '0123456789'
-		));
-		$cart->getQuote()->getShippingAddress()->addData(array(
-			'firstname' => 'Kalle',
-			'lastname' => 'Anka',
-			'street' => 'Ankgatan',
-			'city' => 'Ankeborg',
-			'country_id' => 'SE',
-			'postcode' => '12345'
-		));
-		$cart->getQuote()->getShippingAddress()->save();
-		$cart->getQuote()->collectTotals();
+		if ($cart->getQuote()->getShippingAddress()->getPostcode() !== null){}
+		else{
+			$cart->getQuote()->getBillingAddress()->addData(array(
+				'firstname' => 'Kalle',
+				'lastname' => 'Anka',
+				'street' => 'Ankgatan',
+				'city' => 'Ankeborg',
+				'country_id' => 'SE',
+				'postcode' => '12345',
+				'telephone' => '0123456789'
+			));
+			$cart->getQuote()->getShippingAddress()->addData(array(
+				'firstname' => 'Kalle',
+				'lastname' => 'Anka',
+				'street' => 'Ankgatan',
+				'city' => 'Ankeborg',
+				'country_id' => 'SE',
+				'postcode' => '12345'
+			));
+			$cart->getQuote()->getShippingAddress()->save();
+			$cart->getQuote()->collectTotals();
+		}
 		$this->getShippingMethods();
 		$cart->getQuote()->save();
 	}
@@ -95,7 +99,9 @@ class Cart extends \Magento\Checkout\Block\Onepage {
 	}
 	
 	public function hasCoupon(){
-		if (isset($_SESSION['collector_applied_discount_code'])){
+		$code = $this->checkoutSession->getQuote()->getCouponCode();
+		if ($code){
+			$_SESSION['collector_applied_discount_code'] = $code;
 			return true;
 		}
 		return false;

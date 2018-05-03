@@ -33,13 +33,28 @@ class CancelObserver extends AbstractDataAssignObserver{
 			foreach ($header as $k => $v) {
 				$headerList[] = new \SoapHeader($this->helper->getHeaderUrl(), $k, $v);
 			}
+			$storeId = 0;
+			if ($this->helper->getEnable()){
+				if ($order->getData('collector_ssn') !== null){
+					$storeId = $this->helper->getB2BStoreID();
+				}
+				else {
+					$storeId = $this->helper->getB2CStoreID();
+				}
+			}
+			else {
+				$storeId = $this->helper->getB2CStoreID();
+			}
 			$client->__setSoapHeaders($headerList);
 			$req = array(
 				'CorrelationId' => $order->getIncrementId(),
 				'CountryCode' => $this->helper->getCountryCode(),
 				'InvoiceNo' => $order->getData('collector_invoice_id'),
-				'StoreId' => $this->helper->getStoreId(),
+				'StoreId' => $storeId,
 			);
+			ob_start();
+			print_r($req);
+			file_put_contents(BP . "/var/log/req.log", ob_get_clean() . "\n", FILE_APPEND);
 			try {
 				$client->CancelInvoice($req);
 			}

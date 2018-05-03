@@ -3,14 +3,29 @@
 	$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
 	$config = $objectManager->get('Magento\Framework\App\Config\ScopeConfigInterface')->getValue('collector_collectorcheckout/general/customer_type');
 	$storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
+	$storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
+	$url = $storeManager->getStore()->getBaseUrl();
+	$storeScope = \Magento\Store\Model\ScopeInterface::SCOPE_STORE;
+	$scopeConfig = 	$objectManager->get('\Magento\Framework\App\Config\ScopeConfigInterface');
+	$updateCustomer = $scopeConfig->getValue('collector_collectorcheckout/general/updatecustomer', $storeScope);
+	$showDiscount = $scopeConfig->getValue('collector_collectorcheckout/styling/showdiscount', $storeScope);
+	$checkoutSession = $objectManager->get('\Magento\Checkout\Model\Session');
 ?>
+<script>
+	var cajaxurl = "<?php echo $url . "collectorcheckout/cajax/cajax"; ?>";
+	<?php if ($updateCustomer): ?>
+		var shouldUpdateCustomer = true;
+	<?php else: ?>
+		var shouldUpdateCustomer = false;
+	<?php endif; ?>
+</script>
 <div class="collector-cart" id="collector-cart">
 	<?php if ($config == 3):?>
 	<div id="col-businesstypes" style="float:right;">
-		<a class="col-btype col-active" id="b2c"><?php echo __('Privat');?></a> | <a class="col-btype col-inactive" id="b2b"><?php echo __('Företag');?></a>
+		<a class="col-btype col-active" id="b2c"><?php echo __('Private');?></a> | <a class="col-btype col-inactive" id="b2b"><?php echo __('Company');?></a>
 	</div>
 	<?php endif;?>
-	<h2 class="col-checkout col-title"><?php echo __('Varukorg')?></h2>	
+	<h2 class="col-checkout col-title"><?php echo __('Cart')?></h2>	
 	<div id="area-spinner-container" class="area-spinner-container">
 		<div class="spinner-animation">&nbsp;</div>
 	</div>
@@ -18,17 +33,14 @@
 		<div class="collector-checkout-cart-table">
 			<div class="collector-checkout-table-head">
 				<div class="collector-checkout-product-head"> 
-					<?php echo __('Produkt') ?> 
+					<?php echo __('Product') ?> 
 				</div>
 				<div class="collector-checkout-price-head">
-					<?php echo __('Pris') ?>
+					<?php echo __('Price') ?>
 				</div>
 				<div class="collector-checkout-qty-head">
-					<?php echo __('Antal') ?>
+					<?php echo __('qty') ?>
 				</div>
-				<?php /*?><div class="collector-checkout-sum-head">
-					<?php echo __('Sum') ?>
-				</div><?php */?>
 			</div>
 			<span id="collector-checkout-line" class="collector-checkout-line"></span>
 			<?php foreach($this->getProducts() as $product): ?>
@@ -40,9 +52,6 @@
 						<p><?php echo $product['name'] ?></p>
 						<?php echo $product['options'] ?>
 					</div>
-					<?php /*?><div class="collector-checkout-price" id="price_<?php echo $product['id']?>">
-						<?php echo $product['unitPrice'] ?>
-					</div><?php */?>
 					<div class="collector-checkout-qty" id="qty_ <?php echo $product['id'] ?>">
 						<button class="collector-checkout-button-sub col-sub" id="col-sub-btn sub_<?php echo $product['id'] ?>" name="sub">-</button>
 						<div class="collector-checkout-product-qty"><?php echo $product['qty']?></div>
@@ -51,7 +60,7 @@
 					<div class="collector-checkout-sum" id="sum_<?php echo $product['id'] ?>">
 						<?php echo $product['sum'] ?>
 					</div>
-					<div class="collector-checkout-del-but del" id="del_<?php echo $product['id']?>">
+					<div class="collector-checkout-del-but col-del" id="del_<?php echo $product['id']?>">
 						<span id="col-del-btn del_<?php echo $product['id']?>" class="collector-checkout-button-del col-del" style="height: auto; width: auto;" name="del" ></span>
 					</div>
 					<span id="collector-checkout-line" class="collector-checkout-line"></span>
@@ -61,14 +70,79 @@
 	</div>
 	<div id="col-totals-table" class="col-totals-table">
 		<table class="col-totals">
+			<?php if ($this->hasDiscount()):?>
+				<?php $code = "";
+				$discountCode = $checkoutSession->getQuote()->getCouponCode();
+				if ($discountCode){
+					$_SESSION['collector_applied_discount_code'] = $discountCode;
+				}
+				if (isset($_SESSION['collector_applied_discount_code'])){
+					$code = "(". $_SESSION['collector_applied_discount_code'] . ")";
+				}?>
+				<tr>
+					<td class="col-name"><?php echo __('Discount'); echo " " . $code;?></td>
+					<td class="col-price"><?php echo $this->getDiscount();?></td>
+				</tr>
+			<?php endif;?>
 			<?php $totals = $this->getTotals(); foreach ($totals as $total): ?>
+				<?php
+					if (array_key_exists('value_incl_tax', $total->getData())){
+						if (isset($total->getData()['value_incl_tax'])){
+							if ($total->getData()['value_incl_tax'] > 0){}
+							else {
+								continue;
+							}
+						}
+						else {
+							if (array_key_exists('value', $total->getData())){
+								if ($total->getData()['value'] > 0){}
+								else {
+									continue;
+								}
+							}
+						}
+					}
+					else {
+						if (array_key_exists('value', $total->getData())){
+							if ($total->getData()['value'] > 0){}
+							else {
+								continue;
+							}
+						}
+						else {
+							continue;
+						}
+					}
+					?>
 				<tr>
 					<td class="col-name">
-					<?php	if($total->getData()['title'] == 'Grand Total') { ?>
+					<?php if($total->getData()['code'] == 'grand_total') { ?>
 					<span class="col-grandname"><?php echo $total->getData()['title']; ?></span>
-					<?php }else{ ?>
-					<?php echo $total->getData()['title']; ?>
-					<?php } ?>
+					<?php 
+					}
+					else{
+						if (array_key_exists('value_incl_tax', $total->getData())){
+							if (isset($total->getData()['value_incl_tax'])){
+								if ($total->getData()['value_incl_tax'] > 0){
+									echo $total->getData()['title'];
+								}
+							}
+							else {
+								if (array_key_exists('value', $total->getData())){
+									if ($total->getData()['value'] > 0){
+										echo $total->getData()['title'];
+									}
+								}
+							}
+						}
+						else {
+							if (array_key_exists('value', $total->getData())){
+								if ($total->getData()['value'] > 0){
+									echo $total->getData()['title'];
+								}
+							}
+						}
+					} ?>
 					</td>
 					<?php if($total->getData()['code'] == 'grand_total'){ ?>
 					<td class="col-price col-grand">
@@ -103,11 +177,15 @@
 										echo $priceHelper->currency($total->getData()['value_incl_tax']+floatval(\Magento\Framework\App\ObjectManager::getInstance()->get('\Magento\Framework\App\Config\ScopeConfigInterface')->getValue('collector_collectorcheckout/invoice/invoice_fee_b2b', $storeScope)), true, false);
 									}
 									else {
-										echo $priceHelper->currency($total->getData()['value']+floatval(\Magento\Framework\App\ObjectManager::getInstance()->get('\Magento\Framework\App\Config\ScopeConfigInterface')->getValue('collector_collectorcheckout/invoice/invoice_fee_b2b', $storeScope)), true, false);
+										if ($total->getData()['value'] > 0){
+											echo $priceHelper->currency($total->getData()['value']+floatval(\Magento\Framework\App\ObjectManager::getInstance()->get('\Magento\Framework\App\Config\ScopeConfigInterface')->getValue('collector_collectorcheckout/invoice/invoice_fee_b2b', $storeScope)), true, false);
+										}
 									}
 								}
 								else {
-									echo $priceHelper->currency($total->getData()['value']+floatval(\Magento\Framework\App\ObjectManager::getInstance()->get('\Magento\Framework\App\Config\ScopeConfigInterface')->getValue('collector_collectorcheckout/invoice/invoice_fee_b2b', $storeScope)), true, false);
+									if ($total->getData()['value'] > 0){
+										echo $priceHelper->currency($total->getData()['value']+floatval(\Magento\Framework\App\ObjectManager::getInstance()->get('\Magento\Framework\App\Config\ScopeConfigInterface')->getValue('collector_collectorcheckout/invoice/invoice_fee_b2b', $storeScope)), true, false);
+									}
 								}
 							}
 							else {
@@ -116,11 +194,21 @@
 										echo $priceHelper->currency($total->getData()['value_incl_tax'], true, false);
 									}
 									else {
-										echo $priceHelper->currency($total->getData()['value'], true, false);
+										if (array_key_exists('value', $total->getData())){
+											echo $priceHelper->currency($total->getData()['value'], true, false);
+										}
+										else {
+											//echo $priceHelper->currency(0, true, false);
+										}
 									}
 								}
 								else {
-									echo $priceHelper->currency($total->getData()['value'], true, false);
+									if (array_key_exists('value', $total->getData())){
+										echo $priceHelper->currency($total->getData()['value'], true, false);
+									}
+									else {
+										//echo $priceHelper->currency(0, true, false);
+									}
 								}
 							}
 						?>
@@ -128,19 +216,20 @@
 				</tr>
 			<?php endforeach; ?>
 		</table>
-
-		<div class="collector-checkout-discount">
-			<form action="javascript:void(0);">
-				<?php if ($this->hasCoupon()){ ?>
-					<input type="text" name="code" id="col-code" class="col-code" value="<?php echo $_SESSION['collector_applied_discount_code']; ?>">
-					<input type="button" id="col-codeButton" class="col-codeButton" value="<?php echo __('Cancel') ?>">
-				<?php } else { ?>
-					<input type="text" name="code" placeholder="Rabattkod" id="col-code" class="col-code">
-					<input type="button" id="col-codeButton" class="col-codeButton" value="<?php echo __('Använd') ?>">
-				<?php } ?>
-			</form>
-		</div>
-				<div class="letter_methods newsletter">
+		<?php if ($showDiscount): ?>
+			<div class="collector-checkout-discount">
+				<form action="javascript:void(0);">
+					<?php if ($this->hasCoupon()){ ?>
+						<input type="text" name="code" id="col-code" class="col-code" value="<?php echo $_SESSION['collector_applied_discount_code']; ?>">
+						<input type="button" id="col-codeButton" class="col-codeButton" value="<?php echo __('Cancel') ?>">
+					<?php } else { ?>
+						<input type="text" name="code" placeholder="<?php echo __('Discount Code') ?>" id="col-code" class="col-code">
+						<input type="button" id="col-codeButton" class="col-codeButton" value="<?php echo __('Use') ?>">
+					<?php } ?>
+				</form>
+			</div>
+		<?php endif; ?>
+		<div class="letter_methods newsletter">
 		<form>
 			<input type="checkbox" class="newsletter-checkbox" id="newsletter-checkbox">
 			<label for="newsletter-checkbox" class="checkbox_label"><?php echo __('I want to sign up for the newsletter');?></label>
@@ -158,7 +247,7 @@
 
 
 	<div class="collector_shipping_methods">
-		<h1><?php echo __('Leveransmetoder') ?></h1>
+		<h1><?php echo __('Shipping Methods') ?></h1>
 		<form>
 			<?php foreach ($this->getShippingMethods() as $method): ?>
 				<?php if ($method['first']): ?>

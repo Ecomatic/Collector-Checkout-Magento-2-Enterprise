@@ -153,15 +153,10 @@ class Cajax extends \Magento\Framework\App\Action\Action
 			//	}
 			}
 			else if ($_POST['field2'] == 'newsletter'){
-				ob_start();
-				print_r($_POST);
-				file_put_contents("var/log/coldev.log", ob_get_clean() . "\n", FILE_APPEND);
 				if ($_POST['field3'] == "true"){
-				file_put_contents("var/log/coldev.log", "true" . "\n", FILE_APPEND);
 					$_SESSION['newsletter_signup'] = true;
 				}
 				else {
-				file_put_contents("var/log/coldev.log", "false" . "\n", FILE_APPEND);
 					$_SESSION['newsletter_signup'] = false;
 				}
 			}
@@ -197,6 +192,81 @@ class Cajax extends \Magento\Framework\App\Action\Action
 				$changed = true;
 				$updateCart = true;
 				$updateFees = true;
+			}
+			else if ($_POST['field2'] == 'updatecustomer'){
+				$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+				$cart = $objectManager->get('\Magento\Checkout\Model\Cart');
+				try {
+					$resp = $this->getCheckoutData();
+					if (isset($resp['data']['businessCustomer']['invoiceAddress'])){
+						$scompany	= $resp['data']['businessCustomer']['deliveryAddress']['companyName'];
+						$sfirstname	= $resp['data']['businessCustomer']['firstName'];
+						$slastname	= $resp['data']['businessCustomer']['lastName'];
+						if (isset($resp['data']['businessCustomer']['deliveryAddress']['address'])){
+							$sstreet = $resp['data']['businessCustomer']['deliveryAddress']['address'];
+						}
+						else {
+							$sstreet = $resp['data']['businessCustomer']['deliveryAddress']['postalCode'];
+						}
+						$sstreet	= $resp['data']['businessCustomer']['deliveryAddress']['address'];
+						$scity		= $resp['data']['businessCustomer']['deliveryAddress']['city'];
+						$spostcode	= $resp['data']['businessCustomer']['deliveryAddress']['postalCode'];
+						$stelephone = $resp['data']['businessCustomer']['mobilePhoneNumber'];
+
+						$bcompany	= $resp['data']['businessCustomer']['invoiceAddress']['companyName'];
+						$bfirstname	= $resp['data']['businessCustomer']['firstName'];
+						$blastname	= $resp['data']['businessCustomer']['lastName'];
+						if (isset($resp['data']['businessCustomer']['invoiceAddress']['address'])){
+							$bstreet = $resp['data']['businessCustomer']['invoiceAddress']['address'];
+						}
+						else {
+							$bstreet = $resp['data']['businessCustomer']['invoiceAddress']['postalCode'];
+						}
+						$bcity		= $resp['data']['businessCustomer']['invoiceAddress']['city'];
+						$bpostcode	= $resp['data']['businessCustomer']['invoiceAddress']['postalCode'];
+						$btelephone = $resp['data']['businessCustomer']['mobilePhoneNumber'];
+					}
+					else {
+						$scompany	= '';
+						$sfirstname	= $resp['data']['customer']['deliveryAddress']['firstName'];
+						$slastname	= $resp['data']['customer']['deliveryAddress']['lastName'];
+						$sstreet	= $resp['data']['customer']['deliveryAddress']['address'];
+						$scity		= $resp['data']['customer']['deliveryAddress']['city'];
+						$spostcode	= $resp['data']['customer']['deliveryAddress']['postalCode'];
+						$stelephone = $resp['data']['customer']['mobilePhoneNumber'];
+
+						$bcompany	= '';
+						$bfirstname	= $resp['data']['customer']['billingAddress']['firstName'];
+						$blastname	= $resp['data']['customer']['billingAddress']['lastName'];
+						$bstreet	= $resp['data']['customer']['billingAddress']['address'];
+						$bcity		= $resp['data']['customer']['billingAddress']['city'];
+						$bpostcode	= $resp['data']['customer']['billingAddress']['postalCode'];
+						$btelephone = $resp['data']['customer']['mobilePhoneNumber'];
+					}
+					$cart = $this->objectManager->get('\Magento\Checkout\Model\Cart');
+					$cart->getQuote()->getBillingAddress()->addData(array(
+						'firstname' => $bfirstname,
+						'lastname' => $blastname,
+						'street' => $bstreet,
+						'city' => $bcity,
+						'postcode' => $bpostcode,
+						'telephone' => $btelephone
+					));
+					$cart->getQuote()->getShippingAddress()->addData(array(
+						'firstname' => $sfirstname,
+						'lastname' => $slastname,
+						'street' => $sstreet,
+						'city' => $scity,
+						'postcode' => $spostcode
+					));
+					$cart->getQuote()->getShippingAddress()->save();
+					$cart->getQuote()->collectTotals();
+					$this->helper->getShippingMethods();
+					$cart->getQuote()->save();
+					$updateCart = true;
+					$updateFees = true;
+				}
+				catch (\Exception $e){}
 			}
 			if ($changed){
 				if ($updateCart){
@@ -237,6 +307,50 @@ class Cajax extends \Magento\Framework\App\Action\Action
 	
 	private function updateFees(){
 		$this->helper->updateFees();
+	}
+	
+	private function getCheckoutData(){
+		$pid = $_SESSION['collector_private_id'];
+		$pusername = $this->helper->getUsername();
+		$psharedSecret= $this->helper->getPassword();
+		$array = array();
+		$array['countryCode'] = $this->helper->getCountryCode();
+		$storeId = 0;
+		if (isset($_SESSION['btype'])){
+			if ($_SESSION['btype'] == 'b2b'){
+				$storeId = $this->helper->getB2BStoreID();
+			}
+			else {
+				$storeId = $this->helper->getB2CStoreID();
+			}
+		}
+		else {
+			switch ($this->getCustomerType()){
+				case 1:
+					$_SESSION['btype'] = 'b2c';
+					$storeId = $this->helper->getB2CStoreID();
+				break;
+				case 2:
+					$_SESSION['btype'] = 'b2b';
+					$storeId = $this->helper->getB2BStoreID();
+				break;
+				case 3:
+					$_SESSION['btype'] = 'b2c';
+					$storeId = $this->helper->getB2CStoreID();
+				break;
+			}
+		}
+		$path = '/merchants/'.$storeId.'/checkouts/'.$pid;
+		$json = json_encode($array);
+		$hash = $pusername.":".hash("sha256",$path.$psharedSecret);
+		$hashstr = 'SharedKey '.base64_encode($hash); 
+		$ch = curl_init($this->helper->getWSDL()."merchants/".$storeId."/checkouts/".$pid);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array('charset=utf-8','Authorization:'.$hashstr));
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		$output = curl_exec($ch);
+		$data = json_decode($output,true);
+		curl_close($ch);
+		return $data;
 	}
 
     /**

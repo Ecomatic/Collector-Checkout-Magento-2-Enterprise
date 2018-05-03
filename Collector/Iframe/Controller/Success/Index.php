@@ -130,17 +130,28 @@ class Index extends \Magento\Framework\App\Action\Action {
 			//init the customer
 			$customer = $this->customerFactory->create();
 			$customer->setWebsiteId($websiteId);
-			$customer->loadByEmail($response['data']['customer']['email']); // load customer by email address
+			$email = "";
+			if (isset($response['data']['businessCustomer']['invoiceAddress'])){
+				$email = $response['data']['businessCustomer']['email'];
+				$firstname	= $response['data']['businessCustomer']['firstName'];
+				$lastname	= $response['data']['businessCustomer']['lastName'];
+			}
+			else {
+				$email = $response['data']['customer']['email'];
+				$firstname	= $response['data']['customer']['billingAddress']['firstName'];
+				$lastname	= $response['data']['customer']['billingAddress']['lastName'];
+			}
+			$customer->loadByEmail($email); // load customer by email address
 			//check the customer
 			if (!$customer->getEntityId()){
-                //If not avilable then create this customer
-                $customer->setWebsiteId($websiteId)
-                    ->setStore($store)
-                    ->setFirstname($response['data']['customer']['billingAddress']['firstName'])
-                    ->setLastname($response['data']['customer']['billingAddress']['lastName'])
-                    ->setEmail($response['data']['customer']['email'])
-                    ->setPassword($response['data']['customer']['email']);
-                $customer->save();
+				//If not avilable then create this customer
+				$customer->setWebsiteId($websiteId)
+						->setStore($store)
+						->setFirstname($firstname)
+						->setLastname($lastname)
+						->setEmail($email)
+						->setPassword($email);
+				$customer->save();
 			}
 			if (isset($_SESSION['newsletter_signup'])){
 				if ($_SESSION['newsletter_signup']){
@@ -158,24 +169,72 @@ class Index extends \Magento\Framework\App\Action\Action {
 				$actual_quote->setCouponCode($discountCode);
 			}
 			//Set Address to quote @todo add section in order data for seperate billing and handle it
+			if (isset($response['data']['businessCustomer']['invoiceAddress'])){
+				$scompany	= $response['data']['businessCustomer']['deliveryAddress']['companyName'];
+				$sfirstname	= $response['data']['businessCustomer']['firstName'];
+				$slastname	= $response['data']['businessCustomer']['lastName'];
+				if (isset($response['data']['businessCustomer']['deliveryAddress']['address'])){
+					$sstreet = $response['data']['businessCustomer']['deliveryAddress']['address'];
+				}
+				else {
+					$sstreet = $response['data']['businessCustomer']['deliveryAddress']['postalCode'];
+				}
+				$sstreet	= $response['data']['businessCustomer']['deliveryAddress']['address'];
+				$scity		= $response['data']['businessCustomer']['deliveryAddress']['city'];
+				$spostcode	= $response['data']['businessCustomer']['deliveryAddress']['postalCode'];
+				$stelephone = $response['data']['businessCustomer']['mobilePhoneNumber'];
 
+				$bcompany	= $response['data']['businessCustomer']['invoiceAddress']['companyName'];
+				$bfirstname	= $response['data']['businessCustomer']['firstName'];
+				$blastname	= $response['data']['businessCustomer']['lastName'];
+				if (isset($response['data']['businessCustomer']['invoiceAddress']['address'])){
+					$bstreet = $response['data']['businessCustomer']['invoiceAddress']['address'];
+				}
+				else {
+					$bstreet = $response['data']['businessCustomer']['invoiceAddress']['postalCode'];
+				}
+				$bcity		= $response['data']['businessCustomer']['invoiceAddress']['city'];
+				$bpostcode	= $response['data']['businessCustomer']['invoiceAddress']['postalCode'];
+				$btelephone = $response['data']['businessCustomer']['mobilePhoneNumber'];
+			}
+			else {
+				$scompany	= '';
+				$sfirstname	= $response['data']['customer']['deliveryAddress']['firstName'];
+				$slastname	= $response['data']['customer']['deliveryAddress']['lastName'];
+				$sstreet	= $response['data']['customer']['deliveryAddress']['address'];
+				$scity		= $response['data']['customer']['deliveryAddress']['city'];
+				$spostcode	= $response['data']['customer']['deliveryAddress']['postalCode'];
+				$stelephone = $response['data']['customer']['mobilePhoneNumber'];
+
+				$bcompany	= '';
+				$bfirstname	= $response['data']['customer']['billingAddress']['firstName'];
+				$blastname	= $response['data']['customer']['billingAddress']['lastName'];
+				$bstreet	= $response['data']['customer']['billingAddress']['address'];
+				$bcity		= $response['data']['customer']['billingAddress']['city'];
+				$bpostcode	= $response['data']['customer']['billingAddress']['postalCode'];
+				$btelephone = $response['data']['customer']['mobilePhoneNumber'];
+			}
+			
+			
 			$billingAddress = array(
-				'firstname' => $response['data']['customer']['billingAddress']['firstName'],
-				'lastname' => $response['data']['customer']['billingAddress']['lastName'],
-				'street' => $response['data']['customer']['billingAddress']['address'],
-				'city' => $response['data']['customer']['billingAddress']['city'],
-				'country_id' => $billingCountryId,
-				'postcode' => $response['data']['customer']['billingAddress']['postalCode'],
-				'telephone' => $response['data']['customer']['mobilePhoneNumber']
+				'company' => $bcompany,
+				'firstname' => $bfirstname,
+				'lastname' => $blastname,
+				'street' => $bstreet,
+				'city' => $bcity,
+				'country_id' => $response['data']['countryCode'],
+				'postcode' => $bpostcode,
+				'telephone' => $btelephone
 			);
 			$shippingAddressArr = array(
-				'firstname' => $response['data']['customer']['deliveryAddress']['firstName'],
-				'lastname' => $response['data']['customer']['deliveryAddress']['lastName'],
-				'street' => $response['data']['customer']['deliveryAddress']['address'],
-				'city' => $response['data']['customer']['deliveryAddress']['city'],
-				'country_id' => $shippingCountryId,
-				'postcode' => $response['data']['customer']['deliveryAddress']['postalCode'],
-				'telephone' => $response['data']['customer']['mobilePhoneNumber']
+				'company' => $scompany,
+				'firstname' => $sfirstname,
+				'lastname' => $slastname,
+				'street' => $sstreet,
+				'city' => $scity,
+				'country_id' => $response['data']['countryCode'],
+				'postcode' => $spostcode,
+				'telephone' => $stelephone
 			);
 			$actual_quote->getBillingAddress()->addData($billingAddress);
 			$actual_quote->getShippingAddress()->addData($shippingAddressArr);
@@ -209,6 +268,9 @@ class Index extends \Magento\Framework\App\Action\Action {
 			$emailSender = $objectManager->create('\Magento\Sales\Model\Order\Email\Sender\OrderSender');
 			$emailSender->send($order);
 			$order->setData('collector_invoice_id', $response['data']['purchase']['purchaseIdentifier']);
+			if ($_SESSION['btype'] == 'b2b'){
+				$order->setData('collector_ssn', $response['data']['businessCustomer']['organizationNumber']);
+			}
 			$fee = 0;
             foreach ($response['data']['order']['items'] as $item) {
                 if ($item['id'] == 'invoice_fee') {
@@ -237,8 +299,8 @@ class Index extends \Magento\Framework\App\Action\Action {
             $order->setState($state)->setStatus($status);
             $order->save();
 			$this->eventManager->dispatch(
-					'checkout_onepage_controller_success_action',
-					['order_ids' => [$order->getId()]]
+				'checkout_onepage_controller_success_action',
+				['order_ids' => [$order->getId()]]
 			);
 
 			$this->checkoutSession->clearStorage();

@@ -258,12 +258,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper {
 	}
 	
 	public function setDiscountCode($code){
+		$cart = $this->objectManager->get('\Magento\Checkout\Model\Cart');
 		$ruleId = $this->coupon->loadByCode($code)->getRuleId();
 		if (!empty($ruleId)){
 			$this->checkoutSession->getQuote()->setCouponCode($code)->collectTotals()->save();
 			$_SESSION['collector_applied_discount_code'] = $code;
-			$this->cart->getQuote()->setData('collector_applied_discount_code', $code);
-			$this->cart->getQuote()->save();
+			$cart->getQuote()->setData('collector_applied_discount_code', $code);
+			$cart->getQuote()->save();
 			$this->messageManager->addSuccess(__('You used coupon code "%1".',$code));
 		}
 		else {
@@ -272,9 +273,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper {
 	}
 	
 	public function unsetDiscountCode(){
+		$cart = $this->objectManager->get('\Magento\Checkout\Model\Cart');
 		unset($_SESSION['collector_applied_discount_code']);
-		$this->cart->getQuote()->setData('collector_applied_discount_code', NULL);
-		$this->cart->getQuote()->save();
+		$cart->getQuote()->setData('collector_applied_discount_code', NULL);
+		$cart->getQuote()->save();
 		$this->messageManager->addSuccess(__('You canceled the coupon code.'));
 		$this->checkoutSession->getQuote()->setCouponCode()->collectTotals()->save();
 	}

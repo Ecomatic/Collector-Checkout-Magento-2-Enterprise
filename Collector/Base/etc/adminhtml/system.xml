@@ -52,6 +52,23 @@
 					<label>Denied Status</label>
 					<source_model>Collector\Iframe\Model\Config\Source\DeniedStatus</source_model>
 				</field>
+				<field id="updatecustomer" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+					<label>Update Magento Customer</label>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+					<comment>
+						if selected this will update billing and shipping addresses in magento when they are set in the iframe
+					</comment>
+				</field>
+			</group>
+			<group id="styling" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+				<label>Elements</label>
+				<field id="showdiscount" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+					<label>Show field for discount code</label>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+					<comment>
+						if selected this will show a field for adding discount codes on checkout page
+					</comment>
+				</field>
 			</group>
 			<group id="invoice" translate="label" type="text" sortOrder="150" showInDefault="1" showInWebsite="1" showInStore="1">
 				<label>Invoice</label>

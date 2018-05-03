@@ -206,7 +206,7 @@ define([
 					}
 				});
 			});
-			$(document).on('click', '#businesstypes a', function(e) {
+			$(document).on('click', '#col-businesstypes a', function(e) {
 				e.preventDefault();
 				var ctype = jQuery(this).attr('id');
 				jQuery.ajax({
