@@ -83,7 +83,10 @@ class Cajax extends \Magento\Framework\App\Action\Action
 						}
 						else {
 							if (count($allItems) == 1){
-								$this->helper->clearSession();
+								foreach ($allItems as $item) {
+									$itemId = $item->getItemId();
+									$cart->removeItem($itemId)->save();
+								}
 								return $result->setData("redirect");
 							}
 							else {
@@ -123,7 +126,7 @@ class Cajax extends \Magento\Framework\App\Action\Action
 							);
 						}
 						$_product = $product->load($item->getProduct()->getId());
-						$cart->addProduct($item->getProduct(), $params);
+						$cart->addProduct($_product, $params);
 						$cart->save();
 						$changed = true;
 						$updateCart = true;

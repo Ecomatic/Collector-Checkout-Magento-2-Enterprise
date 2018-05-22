@@ -17,24 +17,12 @@
 		<referenceContainer name="page.wrapper">
 			<container name="collector-cart" htmlTag="div" htmlClass="collector-cart-wrapper" after="header-wrapper">
 				<block class="Collector\Iframe\Block\Cart" cacheable="false" name="collectorjscart" template="Collector_Iframe::Cartjs.phtml" before="main" after="header-wrapper" />
-				<block class="Collector\Iframe\Block\Cart" cacheable="false" name="collectorcart" template="Collector_Iframe::Cart.phtml" before="main" after="header-wrapper" />
+				<block class="Collector\Iframe\Block\Cart" cacheable="false" name="collectorcart" template="Collector_Iframe::Cart.phtml" before="main" after="collectorjscart" />
 			</container>
 			<container name="collector-checkout" htmlTag="div" htmlClass="collector-checkout-wrapper" after="collector-cart">
-				<block class="Collector\Iframe\Block\Checkout" cacheable="false" name="collectorjscheckout" template="Collector_Iframe::Checkoutjs.phtml" before="main" after="collector-cart" />
-				<block class="Collector\Iframe\Block\Checkout" cacheable="false" name="collectorcheckout" template="Collector_Iframe::Checkout.phtml" after="collector-cart"/>
+				<block class="Collector\Iframe\Block\Checkout" cacheable="false" name="collectorjscheckout" template="Collector_Iframe::Checkoutjs.phtml" after="collector-cart" />
+				<block class="Collector\Iframe\Block\Checkout" cacheable="false" name="collectorcheckout" template="Collector_Iframe::Checkout.phtml" after="collectorjscheckout"/>
 			</container>
 		</referenceContainer>
-	<!--	<referenceContainer name="footer-container">
-        		<container name="footer" as="footer" label="Page Footer" htmlTag="div" htmlClass="footer content">
-                		<block class="Magento\Store\Block\Switcher" name="store_switcher" as="store_switcher" template="Magento_Store::switch/stores.phtml"/>
-                		<block class="Magento\Framework\View\Element\Html\Links" name="footer_links">
-                    			<arguments>
-                        			<argument name="css_class" xsi:type="string">footer links</argument>
-                    			</arguments>
-                		</block>
-                		<block class="Magento\Theme\Block\Html\Footer" name="copyright" template="Magento_Theme::html/copyright.phtml"/>
-                		<block class="Magento\Framework\View\Element\Template" name="report.bugs" template="Magento_Theme::html/bugreport.phtml" />
-            		</container>
-        	</referenceContainer> -->
 	</body>
 </page>

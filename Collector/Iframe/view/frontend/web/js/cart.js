@@ -58,6 +58,16 @@ define([
 						window.collector.checkout.api.suspend();
 					},					   
 					success: function(data) {
+						if (data == "redirect"){
+							require([
+								'Magento_Customer/js/customer-data'
+							], function (customerData) {
+								var sections = ['cart'];
+								customerData.invalidate(sections);
+								customerData.reload(sections, true);
+							});
+							window.location.href = window.location.protocol + "//" + window.location.host + "/";
+						}
 						if(data.cart){
 							jQuery('div.collector-cart').replaceWith(data.cart);
 						}
@@ -117,12 +127,12 @@ define([
 					success: function(data) {
 						if (data == "redirect"){
 							require([
-							'Magento_Customer/js/customer-data'
-						], function (customerData) {
-							var sections = ['cart'];
-							customerData.invalidate(sections);
-							customerData.reload(sections, true);
-						});
+								'Magento_Customer/js/customer-data'
+							], function (customerData) {
+								var sections = ['cart'];
+								customerData.invalidate(sections);
+								customerData.reload(sections, true);
+							});
 							window.location.href = window.location.protocol + "//" + window.location.host + "/";
 						}
 						if(data.cart){

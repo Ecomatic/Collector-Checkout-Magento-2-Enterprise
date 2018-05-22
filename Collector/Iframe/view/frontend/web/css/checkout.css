@@ -1,6 +1,11 @@
 body{
     font-weight:bold;
 }
+
+#maincontent{
+	display:none;
+}
+
 .collector-cart-wrapper{
     box-sizing: border-box;
     margin-left: auto;
@@ -9,6 +14,7 @@ body{
     padding-left: 20px;
     padding-right: 20px;
     width: 100%;
+	z-index: 1;
 }
 .collector-checkout-table-head{
     font-size:16px;

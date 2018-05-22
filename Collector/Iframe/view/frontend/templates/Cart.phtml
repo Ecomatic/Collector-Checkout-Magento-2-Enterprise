@@ -236,12 +236,15 @@
 		</form>
 	</div>
 		<script>
-			document.getElementById("col-code").addEventListener("keyup", function(event) {
-				event.preventDefault();
-				if (event.keyCode == 13) {
-					document.getElementById("col-codeButton").click();
-				}
-			});
+			try {
+				document.getElementById("col-code").addEventListener("keyup", function(event) {
+					event.preventDefault();
+					if (event.keyCode == 13) {
+						document.getElementById("col-codeButton").click();
+					}
+				});
+			}
+			catch(err){}
 		</script>
 	</div>
 

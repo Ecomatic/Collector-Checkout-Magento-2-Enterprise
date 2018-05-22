@@ -308,6 +308,7 @@ class Index extends \Magento\Framework\App\Action\Action {
 			return $resultPage;
 		}
 		catch (\Exception $e){
+			file_put_contents(BP . "/pub/static/frontend/Byggmax/base/fi_FI/collector.log", "checkout error: " . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n", FILE_APPEND);
 			file_put_contents(BP . "/var/log/collector.log", "checkout error: " . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n", FILE_APPEND);
 			return $resultPage;
 		}
