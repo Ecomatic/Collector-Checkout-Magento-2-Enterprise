@@ -678,7 +678,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper {
 	}
 		
 	public function updateFees(){
-		$pid = $_SESSION['collector_private_id'];
+		$quote = $this->objectManager->get('\Magento\Checkout\Model\Cart')->getQuote();
+		if (isset($_SESSION['collector_private_id'])){
+			$pid = $_SESSION['collector_private_id'];
+		}
+		else {
+			$pid = $quote->getData('collector_private_id');
+		}
 		$pusername = $this->getUsername();
 		$psharedSecret= $this->getPassword();
 		if (isset($_SESSION['col_curr_fee'])){
@@ -738,7 +744,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper {
 	}
 	
 	public function updateCart(){
-		$pid = $_SESSION['collector_private_id'];
+		$quote = $this->objectManager->get('\Magento\Checkout\Model\Cart')->getQuote();
+		if (isset($_SESSION['collector_private_id'])){
+			$pid = $_SESSION['collector_private_id'];
+		}
+		else {
+			$pid = $quote->getData('collector_private_id');
+		}
 		$pusername = $this->getUsername();
 		$psharedSecret= $this->getPassword();
 		$array = array();
@@ -787,7 +799,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper {
 	}
 	
 	public function getOrderResponse(){
-		$pid = $_SESSION['collector_private_id'];
+		$quote = $this->objectManager->get('\Magento\Checkout\Model\Cart')->getQuote();
+		if (isset($_SESSION['collector_private_id'])){
+			$pid = $_SESSION['collector_private_id'];
+		}
+		else {
+			$pid = $quote->getData('collector_private_id');
+		}
 		$pusername = $this->getUsername();
 		$psharedSecret = $this->getPassword();
 		$array = array();
